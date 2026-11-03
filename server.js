@@ -3,6 +3,8 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
+const session = require('express-session');
+const PgSession = require('connect-pg-simple')(session);
 
 
 const app = express();
@@ -23,9 +25,50 @@ const poolConfig = process.env.DATABASE_URL
       connectionTimeoutMillis: 2500
     };
 const pool = new Pool(poolConfig);
+const sessionStore = new PgSession({
+  pool,
+  tableName: 'user_sessions',
+  createTableIfMissing: true
+});
 
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '100kb' }));
+app.use(session({
+  store: sessionStore,
+  name: 'connect.sid',
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  }
+}));
 app.use(express.static(path.join(__dirname, 'public')));
+
+function startUserSession(req, res, user, statusCode = 200, message = 'Вход выполнен успешно.') {
+  req.session.regenerate((error) => {
+    if (error) {
+      console.error('Не удалось создать сессию:', error);
+      return res.status(500).json({ error: 'Не удалось выполнить вход.' });
+    }
+
+    req.session.userId = user.id;
+    req.session.save((saveError) => {
+      if (saveError) {
+        console.error('Не удалось сохранить сессию:', saveError);
+        return res.status(500).json({ error: 'Не удалось сохранить сессию.' });
+      }
+
+      return res.status(statusCode).json({
+        message,
+        user: { id: user.id, login: user.login }
+      });
+    });
+  });
+}
 
 app.get('/api/health', async (_req, res) => {
   try {
@@ -97,10 +140,13 @@ app.post('/api/register', async (req, res) => {
       [cleanLogin, passwordHash]
     );
 
-    res.status(201).json({
-      message: 'Аккаунт успешно создан.',
-      user: result.rows[0]
-    });
+    return startUserSession(
+      req,
+      res,
+      result.rows[0],
+      201,
+      'Аккаунт успешно создан.'
+    );
 
   } catch (error) {
     // Проверяем, не занят ли логин
@@ -161,32 +207,8 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
-    // Создаём новую сессию
-    req.session.regenerate((error) => {
-      if (error) {
-        return res.status(500).json({
-          error: 'Не удалось выполнить вход.'
-        });
-      }
-
-      req.session.userId = user.id;
-
-      req.session.save((saveError) => {
-        if (saveError) {
-          return res.status(500).json({
-            error: 'Не удалось сохранить сессию.'
-          });
-        }
-
-        res.json({
-          message: 'Вход выполнен успешно.',
-          user: {
-            id: user.id,
-            login: user.login
-          }
-        });
-      });
-    });
+    // Создаём новую сессию после успешной проверки пароля
+    return startUserSession(req, res, user);
 
   } catch (error) {
     console.error('Ошибка входа:', error);
