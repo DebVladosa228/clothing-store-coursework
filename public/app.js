@@ -224,7 +224,7 @@ function setAuthMode(mode) {
   state.authMode = mode;
   $('#loginForm').classList.toggle('hidden', mode !== 'login');
   $('#registerForm').classList.toggle('hidden', mode !== 'register');
-  $('[data-auth-mode]').forEach((button) => button.classList.toggle('active', button.dataset.authMode === mode));
+  $$('[data-auth-mode]').forEach((button) => button.classList.toggle('active', button.dataset.authMode === mode));
   $('#loginError').textContent = '';
   $('#registerError').textContent = '';
 }
@@ -281,7 +281,7 @@ $('#closeAccountButton').addEventListener('click', closeAccount);
 $('#accountBackdrop').addEventListener('click', (event) => {
   if (event.target === $('#accountBackdrop')) closeAccount();
 });
-$('[data-auth-mode]').forEach((button) => button.addEventListener('click', () => setAuthMode(button.dataset.authMode)));
+$$('[data-auth-mode]').forEach((button) => button.addEventListener('click', () => setAuthMode(button.dataset.authMode)));
 $('#loginForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
