@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f3ed">
+  <meta name="description" content="FORMA — базовая одежда для повседневной жизни. Найдите свой новый любимый образ.">
+  <title>FORMA — одежда вне времени</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="announcement"><span>Новая коллекция уже здесь</span><span class="announcement-dot">✳</span><a href="#catalog">Смотреть коллекцию</a></div>
+  <header class="site-header">
+    <button class="icon-button mobile-menu-button" id="mobileMenuButton" aria-label="Открыть меню"><span class="hamburger"></span></button>
+    <a class="brand" href="#top" aria-label="FORMA — главная">f<span>o</span>rma<span class="brand-period">.</span></a>
+    <nav class="main-nav" id="mainNav" aria-label="Главное меню">
+      <a href="#catalog" data-nav-category="all">Каталог</a>
+      <a href="#catalog" data-nav-category="Новинки">Новинки</a>
+      <a href="#story">О бренде</a>
+    </nav>
+    <div class="header-actions">
+      <label class="search-box" for="searchInput"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg><input id="searchInput" type="search" placeholder="Найти вещь..." autocomplete="off"></label>
+      <button class="icon-button favorites-shortcut" id="favoritesButton" aria-label="Показать избранное"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10.1-8.8 10.1S3.2 14 3.2 8.8a4.5 4.5 0 0 1 8.1-2.7 4.5 4.5 0 0 1 9.5 2.7Z"></path></svg><span class="tiny-dot" id="favoritesCount">0</span></button>
+      <button class="icon-button cart-button" id="openCartButton" aria-label="Открыть корзину"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"></path><path d="M9 9V6a3 3 0 0 1 6 0v3"></path></svg><span class="cart-count" id="cartCount">0</span></button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> ОСЕНЬ / ЗИМА 2026</p>
+        <h1 id="heroTitle">Меньше вещей.<br><em>Больше тебя.</em></h1>
+        <p class="hero-description">Одежда, которая не спорит с твоим характером. Продуманные формы, приятные ткани и свобода быть собой каждый день.</p>
+        <div class="hero-buttons"><a class="button button-dark" href="#catalog">Выбрать образ <span>↗</span></a><a class="text-link" href="#story">Наша философия <span>→</span></a></div>
+        <div class="hero-note"><div class="avatar-stack"><span>Ф</span><span>О</span><span>Р</span></div><p><strong>3 000+</strong><br>довольных покупателей</p><span class="hero-note-divider"></span><p class="rating-note"><span>★★★★★</span><br>4.9 / 5.0</p></div>
+        <span class="hero-big-number">01</span>
+      </div>
+      <div class="hero-image-wrap"><img class="hero-image" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1500&q=90" alt="Современные городские образы в нейтральных оттенках" fetchpriority="high"><div class="hero-image-shade"></div><div class="hero-side-label">КАЖДЫЙ ДЕНЬ — ТВОЙ</div><div class="hero-image-sticker"><span>NEW</span><strong>Сезон<br>свободных<br>решений</strong><span class="sticker-arrow">↘</span></div><div class="hero-image-bottom"><span>Коллекция 026</span><span>Москва · Везде</span></div></div>
+    </section>
+
+    <section class="benefits" aria-label="Преимущества магазина"><div><span class="benefit-icon">✳</span><p><strong>Продуманный состав</strong><small>Приятные ткани на каждый день</small></p></div><div><span class="benefit-icon">↗</span><p><strong>Доставка по России</strong><small>Бережно упакуем твой заказ</small></p></div><div><span class="benefit-icon">↺</span><p><strong>Лёгкий возврат</strong><small>14 дней на решение</small></p></div><div><span class="benefit-icon">♡</span><p><strong>Вещи надолго</strong><small>Вне мимолётных трендов</small></p></div></section>
+
+    <section class="catalog-section section-pad" id="catalog">
+      <div class="section-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> ВЫБРАНО ДЛЯ ТЕБЯ</p><h2>Гардероб без <em>шума.</em></h2></div><p class="section-description">Те самые вещи, которые легко сочетаются<br class="desktop-only"> и остаются актуальными дольше одного сезона.</p></div>
+      <div class="catalog-toolbar"><div class="category-tabs" id="categoryTabs" role="group" aria-label="Категории товаров"><button class="category-tab active" data-category="all">Всё <span class="tab-count" id="allCount">08</span></button><button class="category-tab" data-category="Новинки">Новинки</button><button class="category-tab" data-category="Футболки">Футболки</button><button class="category-tab" data-category="Рубашки">Рубашки</button><button class="category-tab" data-category="Брюки">Брюки</button><button class="category-tab" data-category="Толстовки">Трикотаж</button><button class="category-tab" data-category="Верхняя одежда">Верхняя одежда</button></div><label class="sort-control">Сортировка <select id="sortSelect" aria-label="Сортировка каталога"><option value="featured">По популярности</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option><option value="name">По названию</option></select></label></div>
+      <div class="results-line"><span id="resultsText">8 вещей для твоего гардероба</span><button class="reset-filters" id="resetFilters">Сбросить фильтры <span>×</span></button></div>
+      <div class="product-grid" id="productGrid" aria-live="polite"></div>
+      <div class="empty-state hidden" id="emptyState"><span>⌕</span><h3>Ничего не найдено</h3><p>Попробуй изменить запрос или выбрать другую категорию.</p><button class="button button-dark" id="emptyReset">Показать все товары</button></div>
+      <div class="catalog-bottom"><span>ПОДОБРАНО С ВНИМАНИЕМ · СОЗДАНО ДЛЯ ЖИЗНИ</span><a href="#catalog" id="showAllLink">Смотреть весь каталог <span>↗</span></a></div>
+    </section>
+
+    <section class="editorial" id="story"><div class="editorial-image"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=85" alt="Минималистичный городской образ" loading="lazy"><div class="editorial-image-label">FORMA / YOUR FORM</div></div><div class="editorial-copy"><p class="eyebrow"><span class="eyebrow-line"></span> НЕ ПРО МОДУ. ПРО ТЕБЯ.</p><h2>Стиль — это<br>не правила.<br><em>Это ощущение.</em></h2><p>Мы верим, что одежда должна помогать жить, а не усложнять выбор. Поэтому создаём понятные вещи, которые легко становятся частью твоей истории.</p><a class="button button-outline" href="#catalog">Найти своё <span>↗</span></a><span class="editorial-deco">F.</span></div></section>
+
+    <section class="newsletter"><div class="newsletter-mark">f.</div><div class="newsletter-copy"><p class="eyebrow">НЕ СПАМИМ. ОБЕЩАЕМ.</p><h2>Письма со <em>вкусом.</em></h2><p>Новые коллекции, идеи сочетаний и немного вдохновения — иногда, по делу.</p></div><form id="newsletterForm" class="newsletter-form"><label class="sr-only" for="newsletterEmail">Ваш e-mail</label><input type="email" id="newsletterEmail" placeholder="Твой e-mail" required><button type="submit" aria-label="Подписаться">↗</button><small id="newsletterMessage">Нажимая кнопку, ты соглашаешься с политикой конфиденциальности.</small></form></section>
+  </main>
+
+  <footer class="site-footer"><div class="footer-top"><div class="footer-brand-block"><a class="brand brand-footer" href="#top">f<span>o</span>rma<span class="brand-period">.</span></a><p>Одежда для настоящей жизни.<br>Не нужно быть кем-то другим.</p></div><div class="footer-column"><strong>ПОКУПАТЕЛЯМ</strong><a href="#catalog">Каталог</a><a href="#catalog" data-nav-category="Новинки">Новинки</a><a href="#story">О бренде</a></div><div class="footer-column"><strong>ПОМОЩЬ</strong><a href="#delivery">Доставка и оплата</a><a href="#delivery">Возврат и обмен</a><a href="mailto:hello@forma.example">Написать нам</a></div><div class="footer-contact"><strong>ЕСТЬ ВОПРОСЫ?</strong><a class="footer-email" href="mailto:hello@forma.example">hello@forma.example</a><span>Ежедневно, 10:00–20:00 МСК</span><div class="socials"><a href="#top" aria-label="Telegram">tg ↗</a><a href="#top" aria-label="ВКонтакте">vk ↗</a><a href="#top" aria-label="Pinterest">pin ↗</a></div></div></div><div id="delivery" class="footer-bottom"><span>© 2026 FORMA. Курсовой проект.</span><span>Сделано с вниманием к деталям <b>✳</b></span><a href="#top">Наверх ↑</a></div></footer>
+
+  <div class="overlay" id="overlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Корзина" aria-hidden="true"><div class="drawer-header"><div><p class="eyebrow">ТВОИ ВЫБРАННЫЕ ВЕЩИ</p><h2>Корзина <span id="drawerCount">(0)</span></h2></div><button class="close-button" id="closeCartButton" aria-label="Закрыть корзину">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-empty" id="cartEmpty"><div class="cart-empty-icon">↗</div><h3>Пока здесь пусто</h3><p>Кажется, идеальная вещь уже ждёт тебя в каталоге.</p><button class="button button-dark" id="continueShopping">Перейти к покупкам</button></div><div class="cart-summary hidden" id="cartSummary"><div class="delivery-progress"><span class="delivery-check">✳</span><p id="deliveryMessage">Добавь товары в корзину</p></div><div class="summary-row"><span>Сумма заказа</span><strong id="cartSubtotal">0 ₽</strong></div><div class="summary-row shipping-row"><span>Доставка</span><span id="shippingCost">Рассчитывается при оформлении</span></div><div class="summary-total"><span>Итого</span><strong id="cartTotal">0 ₽</strong></div><button class="button button-dark checkout-button" id="checkoutButton">Оформить заказ <span>↗</span></button><p class="secure-note">Оплата и доставка согласовываются после подтверждения заказа.</p></div></aside>
+
+  <div class="modal-backdrop" id="checkoutBackdrop" aria-hidden="true"><section class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle"><div class="modal-heading"><div><p class="eyebrow">ПОСЛЕДНИЙ ШАГ</p><h2 id="checkoutTitle">Оформление <em>заказа.</em></h2></div><button class="close-button" id="closeCheckoutButton" aria-label="Закрыть оформление">×</button></div><form id="checkoutForm"><div class="form-grid"><label>Имя и фамилия<input name="name" required minlength="2" autocomplete="name" placeholder="Как к тебе обращаться"></label><label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="name@example.com"></label><label>Телефон<input name="phone" type="tel" required autocomplete="tel" placeholder="+7 900 000-00-00"></label><label>Адрес доставки<input name="address" required autocomplete="street-address" placeholder="Город, улица, дом"></label><label class="full-field">Комментарий к заказу <span class="optional">необязательно</span><textarea name="comment" rows="2" placeholder="Подъезд, удобное время и другие детали"></textarea></label></div><div class="checkout-total"><span>К оплате после подтверждения</span><strong id="checkoutTotal">0 ₽</strong></div><p class="form-error" id="checkoutError" role="alert"></p><button class="button button-dark submit-order" type="submit" id="submitOrderButton">Подтвердить заказ <span>↗</span></button><p class="form-legal">Нажимая кнопку, вы соглашаетесь на обработку данных, необходимых для оформления заказа.</p></form></section></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
