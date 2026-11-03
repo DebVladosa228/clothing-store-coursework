@@ -22,6 +22,7 @@
       <a href="#story">О бренде</a>
     </nav>
     <div class="header-actions">
+      <button class="account-button" id="accountButton" type="button">Войти</button>
       <label class="search-box" for="searchInput"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg><input id="searchInput" type="search" placeholder="Найти вещь..." autocomplete="off"></label>
       <button class="icon-button favorites-shortcut" id="favoritesButton" aria-label="Показать избранное"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5.2-8.8 10.1-8.8 10.1S3.2 14 3.2 8.8a4.5 4.5 0 0 1 8.1-2.7 4.5 4.5 0 0 1 9.5 2.7Z"></path></svg><span class="tiny-dot" id="favoritesCount">0</span></button>
       <button class="icon-button cart-button" id="openCartButton" aria-label="Открыть корзину"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 12H4L5 8Z"></path><path d="M9 9V6a3 3 0 0 1 6 0v3"></path></svg><span class="cart-count" id="cartCount">0</span></button>
@@ -63,6 +64,41 @@
   <aside class="cart-drawer" id="cartDrawer" aria-label="Корзина" aria-hidden="true"><div class="drawer-header"><div><p class="eyebrow">ТВОИ ВЫБРАННЫЕ ВЕЩИ</p><h2>Корзина <span id="drawerCount">(0)</span></h2></div><button class="close-button" id="closeCartButton" aria-label="Закрыть корзину">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-empty" id="cartEmpty"><div class="cart-empty-icon">↗</div><h3>Пока здесь пусто</h3><p>Кажется, идеальная вещь уже ждёт тебя в каталоге.</p><button class="button button-dark" id="continueShopping">Перейти к покупкам</button></div><div class="cart-summary hidden" id="cartSummary"><div class="delivery-progress"><span class="delivery-check">✳</span><p id="deliveryMessage">Добавь товары в корзину</p></div><div class="summary-row"><span>Сумма заказа</span><strong id="cartSubtotal">0 ₽</strong></div><div class="summary-row shipping-row"><span>Доставка</span><span id="shippingCost">Рассчитывается при оформлении</span></div><div class="summary-total"><span>Итого</span><strong id="cartTotal">0 ₽</strong></div><button class="button button-dark checkout-button" id="checkoutButton">Оформить заказ <span>↗</span></button><p class="secure-note">Оплата и доставка согласовываются после подтверждения заказа.</p></div></aside>
 
   <div class="modal-backdrop" id="checkoutBackdrop" aria-hidden="true"><section class="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle"><div class="modal-heading"><div><p class="eyebrow">ПОСЛЕДНИЙ ШАГ</p><h2 id="checkoutTitle">Оформление <em>заказа.</em></h2></div><button class="close-button" id="closeCheckoutButton" aria-label="Закрыть оформление">×</button></div><form id="checkoutForm"><div class="form-grid"><label>Имя и фамилия<input name="name" required minlength="2" autocomplete="name" placeholder="Как к тебе обращаться"></label><label>E-mail<input name="email" type="email" required autocomplete="email" placeholder="name@example.com"></label><label>Телефон<input name="phone" type="tel" required autocomplete="tel" placeholder="+7 900 000-00-00"></label><label>Адрес доставки<input name="address" required autocomplete="street-address" placeholder="Город, улица, дом"></label><label class="full-field">Комментарий к заказу <span class="optional">необязательно</span><textarea name="comment" rows="2" placeholder="Подъезд, удобное время и другие детали"></textarea></label></div><div class="checkout-total"><span>К оплате после подтверждения</span><strong id="checkoutTotal">0 ₽</strong></div><p class="form-error" id="checkoutError" role="alert"></p><button class="button button-dark submit-order" type="submit" id="submitOrderButton">Подтвердить заказ <span>↗</span></button><p class="form-legal">Нажимая кнопку, вы соглашаетесь на обработку данных, необходимых для оформления заказа.</p></form></section></div>
+  <div class="modal-backdrop" id="accountBackdrop" aria-hidden="true">
+    <section class="checkout-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+      <div class="modal-heading">
+        <div><p class="eyebrow">ЛИЧНЫЙ КАБИНЕТ FORMA</p><h2 id="accountTitle">Твой <em>аккаунт.</em></h2></div>
+        <button class="close-button" id="closeAccountButton" type="button" aria-label="Закрыть окно">×</button>
+      </div>
+      <div id="authForms">
+        <div class="auth-tabs" role="group" aria-label="Выберите действие">
+          <button class="auth-tab active" type="button" data-auth-mode="login">Войти</button>
+          <button class="auth-tab" type="button" data-auth-mode="register">Создать аккаунт</button>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <label>Логин<input name="login" type="text" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]{3,30}" autocomplete="username" placeholder="Твой логин"></label>
+          <label>Пароль<input name="password" type="password" required minlength="8" maxlength="72" autocomplete="current-password" placeholder="Не менее 8 символов"></label>
+          <p class="form-error" id="loginError" role="alert"></p>
+          <button class="button button-dark auth-submit" type="submit">Войти в аккаунт <span>↗</span></button>
+        </form>
+        <form id="registerForm" class="auth-form hidden">
+          <label>Логин<input name="login" type="text" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]{3,30}" autocomplete="username" placeholder="Латинские буквы, цифры или _"></label>
+          <label>Пароль<input name="password" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Не менее 8 символов"></label>
+          <label>Повтори пароль<input name="confirmPassword" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Повтори пароль"></label>
+          <p class="form-error" id="registerError" role="alert"></p>
+          <button class="button button-dark auth-submit" type="submit">Создать аккаунт <span>↗</span></button>
+          <p class="form-legal">Регистрация только по логину и паролю. Восстановление забытого пароля по e-mail не предусмотрено.</p>
+        </form>
+      </div>
+      <div id="accountPanel" class="account-panel hidden">
+        <p class="account-greeting">Ты вошёл как</p>
+        <strong id="accountLogin"></strong>
+        <p class="account-description">Теперь ты можешь пользоваться личным кабинетом FORMA.</p>
+        <p class="form-error" id="logoutError" role="alert"></p>
+        <button class="button button-dark auth-submit" id="logoutButton" type="button">Выйти из аккаунта</button>
+      </div>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="/app.js" defer></script>
 </body>
