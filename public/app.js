@@ -235,12 +235,41 @@ function renderAccount() {
   $('#accountPanel').classList.toggle('hidden', !signedIn);
   if (signedIn) $('#accountLogin').textContent = state.currentUser.login;
 }
+
+async function loadMyOrders() {
+  const message = $('#ordersMessage');
+  const list = $('#ordersList');
+  if (!state.currentUser) return;
+  message.textContent = 'Загружаем заказы…';
+  list.innerHTML = '';
+  try {
+    const response = await fetch('/api/my-orders', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+    const result = await response.json().catch(() => []);
+    if (!response.ok) throw new Error(result.error || 'Не удалось загрузить заказы.');
+    if (!result.length) {
+      message.textContent = 'У тебя пока нет оформленных заказов.';
+      return;
+    }
+    message.textContent = '';
+    list.innerHTML = result.map((order) => {
+      const date = new Date(order.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+      const items = (order.items || []).map((item) =>
+        '<div class="order-item"><span>' + escapeHTML(item.productName) + ' · ' + escapeHTML(item.size) + ' · ' + Number(item.quantity) + ' шт.</span><strong>' + money(Number(item.unitPrice) * Number(item.quantity)) + '</strong></div>'
+      ).join('');
+      return '<article class="order-card"><div class="order-card-top"><div><strong>Заказ №' + escapeHTML(order.id) + '</strong><small>' + escapeHTML(date) + '</small></div><span class="order-status">' + escapeHTML(order.status) + '</span></div><div class="order-items">' + items + '</div><div class="order-card-total"><span>Итого</span><strong>' + money(order.total) + '</strong></div></article>';
+    }).join('');
+  } catch (error) {
+    message.textContent = error.message;
+  }
+}
+
 function openAccount() {
   $('#accountBackdrop').classList.add('open');
   $('#accountBackdrop').setAttribute('aria-hidden', 'false');
   document.body.classList.add('no-scroll');
   $('#logoutError').textContent = '';
   renderAccount();
+  if (state.currentUser) loadMyOrders();
   if (!state.currentUser) {
     setAuthMode(state.authMode);
     const firstInput = state.authMode === 'login' ? $('#loginForm [name="login"]') : $('#registerForm [name="login"]');
@@ -295,6 +324,7 @@ $('#loginForm').addEventListener('submit', async (event) => {
     state.currentUser = result.user;
     form.reset();
     renderAccount();
+    loadMyOrders();
     showToast('С возвращением, ' + result.user.login + '!');
   } catch (error) {
     errorBox.textContent = error.message;
@@ -337,6 +367,7 @@ $('#registerForm').addEventListener('submit', async (event) => {
     submit.disabled = false;
   }
 });
+$('#refreshOrdersButton').addEventListener('click', loadMyOrders);
 $('#logoutButton').addEventListener('click', async () => {
   const errorBox = $('#logoutError');
   errorBox.textContent = '';
@@ -384,6 +415,7 @@ $('#checkoutForm').addEventListener('submit', async (event) => {
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || 'Не удалось оформить заказ. Проверьте подключение базы данных.');
     state.cart = []; saveStorage(); renderCart(); closeCheckout(); event.currentTarget.reset();
+    if (state.currentUser) loadMyOrders();
     showToast(`Заказ №${result.orderId} оформлен! Мы свяжемся с вами.`);
   } catch (error) {
     errorBox.textContent = error.message.includes('Failed to fetch') ? 'Не удалось связаться с сервером. Запустите проект через npm start, настройте PostgreSQL и повторите попытку.' : error.message;
