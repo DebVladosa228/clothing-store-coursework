@@ -7,6 +7,13 @@ const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 
 
+if (
+  !process.env.SESSION_SECRET ||
+  process.env.SESSION_SECRET === 'replace_with_a_long_random_secret'
+) {
+  throw new Error('Укажите уникальный SESSION_SECRET в переменных окружения.');
+}
+
 const app = express();
 const port = Number(process.env.PORT || 3000);
 // In hosting, DATABASE_URL contains the remote PostgreSQL connection string.
