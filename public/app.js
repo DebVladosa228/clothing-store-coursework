@@ -20,6 +20,8 @@ const state = {
   favorites: new Set(readStorage('forma-favorites', [])),
   favoritesOnly: false,
   cartOpen: false,
+  currentUser: null,
+  authMode: 'login',
   toastTimer: null
 };
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -218,13 +220,146 @@ $$('[data-nav-category]').forEach((link) => link.addEventListener('click', (even
   state.activeCategory = category === 'all' ? 'all' : category; state.search = ''; state.favoritesOnly = false;
   $('#searchInput').value = ''; renderProducts(); $('#catalog').scrollIntoView({ behavior: 'smooth' }); $('#mainNav').classList.remove('open');
 }));
+function setAuthMode(mode) {
+  state.authMode = mode;
+  $('#loginForm').classList.toggle('hidden', mode !== 'login');
+  $('#registerForm').classList.toggle('hidden', mode !== 'register');
+  $('[data-auth-mode]').forEach((button) => button.classList.toggle('active', button.dataset.authMode === mode));
+  $('#loginError').textContent = '';
+  $('#registerError').textContent = '';
+}
+function renderAccount() {
+  const signedIn = Boolean(state.currentUser);
+  $('#accountButton').textContent = signedIn ? state.currentUser.login : 'Войти';
+  $('#authForms').classList.toggle('hidden', signedIn);
+  $('#accountPanel').classList.toggle('hidden', !signedIn);
+  if (signedIn) $('#accountLogin').textContent = state.currentUser.login;
+}
+function openAccount() {
+  $('#accountBackdrop').classList.add('open');
+  $('#accountBackdrop').setAttribute('aria-hidden', 'false');
+  document.body.classList.add('no-scroll');
+  $('#logoutError').textContent = '';
+  renderAccount();
+  if (!state.currentUser) {
+    setAuthMode(state.authMode);
+    const firstInput = state.authMode === 'login' ? $('#loginForm [name="login"]') : $('#registerForm [name="login"]');
+    firstInput.focus();
+  } else {
+    $('#closeAccountButton').focus();
+  }
+}
+function closeAccount() {
+  $('#accountBackdrop').classList.remove('open');
+  $('#accountBackdrop').setAttribute('aria-hidden', 'true');
+  if (!$('#checkoutBackdrop').classList.contains('open')) document.body.classList.remove('no-scroll');
+}
+async function requestAuth(url, payload) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify(payload)
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || 'Не удалось выполнить запрос.');
+  return result;
+}
+async function checkCurrentUser() {
+  try {
+    const response = await fetch('/api/me', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+    if (!response.ok) return;
+    const result = await response.json();
+    state.currentUser = result.authenticated ? result.user : null;
+    renderAccount();
+  } catch (_error) {
+    // Если сервер недоступен, магазин продолжает работать в режиме просмотра.
+  }
+}
+$('#accountButton').addEventListener('click', openAccount);
+$('#closeAccountButton').addEventListener('click', closeAccount);
+$('#accountBackdrop').addEventListener('click', (event) => {
+  if (event.target === $('#accountBackdrop')) closeAccount();
+});
+$('[data-auth-mode]').forEach((button) => button.addEventListener('click', () => setAuthMode(button.dataset.authMode)));
+$('#loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const errorBox = $('#loginError');
+  const submit = form.querySelector('button[type="submit"]');
+  const data = new FormData(form);
+  submit.disabled = true;
+  errorBox.textContent = '';
+  try {
+    const result = await requestAuth('/api/login', { login: data.get('login'), password: data.get('password') });
+    state.currentUser = result.user;
+    form.reset();
+    renderAccount();
+    showToast('С возвращением, ' + result.user.login + '!');
+  } catch (error) {
+    errorBox.textContent = error.message;
+  } finally {
+    submit.disabled = false;
+  }
+});
+$('#registerForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const errorBox = $('#registerError');
+  const submit = form.querySelector('button[type="submit"]');
+  const data = new FormData(form);
+  const login = String(data.get('login') || '').trim();
+  const password = String(data.get('password') || '');
+  const confirmPassword = String(data.get('confirmPassword') || '');
+  errorBox.textContent = '';
+  if (password !== confirmPassword) {
+    errorBox.textContent = 'Пароли не совпадают.';
+    return;
+  }
+  if (!/^[A-Za-z0-9_]{3,30}$/.test(login)) {
+    errorBox.textContent = 'Логин: от 3 до 30 символов — латинские буквы, цифры или _.';
+    return;
+  }
+  if (new TextEncoder().encode(password).length > 72) {
+    errorBox.textContent = 'Пароль слишком длинный. Максимум — 72 байта.';
+    return;
+  }
+  submit.disabled = true;
+  try {
+    const result = await requestAuth('/api/register', { login, password });
+    state.currentUser = result.user;
+    form.reset();
+    renderAccount();
+    showToast('Аккаунт создан. Добро пожаловать!');
+  } catch (error) {
+    errorBox.textContent = error.message;
+  } finally {
+    submit.disabled = false;
+  }
+});
+$('#logoutButton').addEventListener('click', async () => {
+  const errorBox = $('#logoutError');
+  errorBox.textContent = '';
+  try {
+    const response = await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Не удалось выйти из аккаунта.');
+    state.currentUser = null;
+    renderAccount();
+    setAuthMode('login');
+    showToast('Ты вышел из аккаунта.');
+  } catch (error) {
+    errorBox.textContent = error.message;
+  }
+});
+
 $('#mobileMenuButton').addEventListener('click', () => $('#mainNav').classList.toggle('open'));
 $('#searchInput').addEventListener('focus', () => { if (window.matchMedia('(max-width: 760px)').matches) $('.search-box').classList.add('expanded'); });
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.search-box') && window.matchMedia('(max-width: 760px)').matches) $('.search-box').classList.remove('expanded');
 });
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') { closeCart(); closeCheckout(); $('#mainNav').classList.remove('open'); }
+  if (event.key === 'Escape') { closeCart(); closeCheckout(); closeAccount(); $('#mainNav').classList.remove('open'); }
 });
 $('#newsletterForm').addEventListener('submit', (event) => {
   event.preventDefault();
@@ -273,3 +408,4 @@ async function loadProducts() {
 
 renderProducts(); renderCart();
 loadProducts();
+checkCurrentUser();
