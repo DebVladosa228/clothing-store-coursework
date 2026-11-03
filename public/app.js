@@ -386,10 +386,6 @@ $('#logoutButton').addEventListener('click', async () => {
 });
 
 $('#mobileMenuButton').addEventListener('click', () => $('#mainNav').classList.toggle('open'));
-$('#searchInput').addEventListener('focus', () => { if (window.matchMedia('(max-width: 760px)').matches) $('.search-box').classList.add('expanded'); });
-document.addEventListener('click', (event) => {
-  if (!event.target.closest('.search-box') && window.matchMedia('(max-width: 760px)').matches) $('.search-box').classList.remove('expanded');
-});
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') { closeCart(); closeCheckout(); closeAccount(); $('#mainNav').classList.remove('open'); }
 });
