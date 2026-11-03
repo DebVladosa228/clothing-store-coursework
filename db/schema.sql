@@ -1,6 +1,19 @@
 -- База данных интернет-магазина одежды FORMA
 -- Выполните этот файл в базе данных forma_store через pgAdmin или psql.
 
+-- Учётные записи покупателей. Храним только bcrypt-хеш пароля.
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    login VARCHAR(30) NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT users_login_length CHECK (char_length(login) BETWEEN 3 AND 30)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS users_login_unique_idx
+    ON users (LOWER(login));
+
+
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(160) NOT NULL,
