@@ -93,7 +93,12 @@
       <div id="accountPanel" class="account-panel hidden">
         <p class="account-greeting">Ты вошёл как</p>
         <strong id="accountLogin"></strong>
-        <p class="account-description">Теперь ты можешь пользоваться личным кабинетом FORMA.</p>
+        <p class="account-description">Твой профиль и покупки в одном месте.</p>
+        <div class="account-orders">
+          <div class="account-orders-heading"><h3>История заказов</h3><button type="button" class="orders-refresh" id="refreshOrdersButton">Обновить ↻</button></div>
+          <p class="orders-message" id="ordersMessage">Загружаем заказы…</p>
+          <div class="orders-list" id="ordersList"></div>
+        </div>
         <p class="form-error" id="logoutError" role="alert"></p>
         <button class="button button-dark auth-submit" id="logoutButton" type="button">Выйти из аккаунта</button>
       </div>
