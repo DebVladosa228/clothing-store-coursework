@@ -38,6 +38,17 @@ const sessionStore = new PgSession({
   createTableIfMissing: true
 });
 
+// Связываем новые заказы с аккаунтами. Старые и гостевые заказы остаются без владельца.
+const accountOrdersSchemaReady = pool.query(`
+  ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS user_id BIGINT REFERENCES users(id) ON DELETE SET NULL;
+  CREATE INDEX IF NOT EXISTS idx_orders_user_created_at
+    ON orders(user_id, created_at DESC);
+`).catch((error) => {
+  console.error('Не удалось подготовить историю заказов:', error.message);
+  throw error;
+});
+
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '100kb' }));
 app.use(session({
@@ -276,6 +287,110 @@ app.get('/api/me', async (req, res) => {
     res.status(500).json({
       error: 'Не удалось проверить авторизацию.'
     });
+  }
+});
+
+
+// Создание заказа. Если покупатель вошёл в аккаунт, заказ сохраняется в его истории.
+app.post('/api/orders', async (req, res) => {
+  const customer = req.body?.customer || {};
+  const items = req.body?.items;
+  if (
+    typeof customer.name !== 'string' || customer.name.trim().length < 2 ||
+    typeof customer.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email) ||
+    typeof customer.phone !== 'string' || customer.phone.trim().length < 5 ||
+    typeof customer.address !== 'string' || customer.address.trim().length < 5 ||
+    !Array.isArray(items) || items.length === 0 || items.length > 50
+  ) {
+    return res.status(400).json({ error: 'Проверьте контактные данные и состав заказа.' });
+  }
+
+  let client;
+  try {
+    await accountOrdersSchemaReady;
+    client = await pool.connect();
+    await client.query('BEGIN');
+
+    const normalizedItems = [];
+    let total = 0;
+    for (const item of items) {
+      const productId = Number(item.id);
+      const quantity = Number(item.quantity);
+      const size = typeof item.size === 'string' ? item.size.trim() : '';
+      if (!Number.isInteger(productId) || productId < 1 || !Number.isInteger(quantity) || quantity < 1 || quantity > 20 || !size) {
+        throw Object.assign(new Error('Некорректный товар в заказе.'), { statusCode: 400 });
+      }
+
+      const productResult = await client.query(
+        'SELECT id, name, price, sizes, stock FROM products WHERE id = $1 FOR UPDATE',
+        [productId]
+      );
+      const product = productResult.rows[0];
+      if (!product) throw Object.assign(new Error('Один из товаров больше не существует.'), { statusCode: 400 });
+      if (!product.sizes.includes(size)) throw Object.assign(new Error('Выбранный размер недоступен.'), { statusCode: 400 });
+      if (Number(product.stock) < quantity) throw Object.assign(new Error(`Недостаточно товара «${product.name}» на складе.`), { statusCode: 409 });
+
+      const unitPrice = Number(product.price);
+      total += unitPrice * quantity;
+      normalizedItems.push({ ...product, quantity, size, unitPrice });
+    }
+
+    const orderResult = await client.query(
+      `INSERT INTO orders (user_id, customer_name, customer_email, customer_phone, delivery_address, comment, total)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [req.session?.userId || null, customer.name.trim(), customer.email.trim(), customer.phone.trim(), customer.address.trim(), String(customer.comment || '').trim() || null, total]
+    );
+    const orderId = orderResult.rows[0].id;
+
+    for (const item of normalizedItems) {
+      await client.query(
+        `INSERT INTO order_items (order_id, product_id, product_name, size, quantity, unit_price)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [orderId, item.id, item.name, item.size, item.quantity, item.unitPrice]
+      );
+      await client.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [item.quantity, item.id]);
+    }
+
+    await client.query('COMMIT');
+    return res.status(201).json({ message: 'Заказ оформлен.', orderId });
+  } catch (error) {
+    if (client) await client.query('ROLLBACK').catch(() => {});
+    console.error('Ошибка оформления заказа:', error);
+    return res.status(error.statusCode || 500).json({ error: error.statusCode ? error.message : 'Не удалось оформить заказ.' });
+  } finally {
+    if (client) client.release();
+  }
+});
+
+// История заказов доступна только владельцу аккаунта.
+app.get('/api/my-orders', async (req, res) => {
+  if (!req.session?.userId) return res.status(401).json({ error: 'Войдите в аккаунт, чтобы посмотреть заказы.' });
+  try {
+    await accountOrdersSchemaReady;
+    const result = await pool.query(
+      `SELECT o.id, o.total, o.status, o.created_at,
+              COALESCE(
+                json_agg(json_build_object(
+                  'productName', oi.product_name,
+                  'size', oi.size,
+                  'quantity', oi.quantity,
+                  'unitPrice', oi.unit_price
+                ) ORDER BY oi.id) FILTER (WHERE oi.id IS NOT NULL),
+                '[]'::json
+              ) AS items
+       FROM orders o
+       LEFT JOIN order_items oi ON oi.order_id = o.id
+       WHERE o.user_id = $1
+       GROUP BY o.id
+       ORDER BY o.created_at DESC
+       LIMIT 50`,
+      [req.session.userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Ошибка загрузки истории заказов:', error);
+    res.status(500).json({ error: 'Не удалось загрузить историю заказов.' });
   }
 });
 
