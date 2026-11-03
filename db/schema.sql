@@ -78,3 +78,10 @@ ON CONFLICT (id) DO UPDATE SET
     is_new = EXCLUDED.is_new;
 
 SELECT setval(pg_get_serial_sequence('products', 'id'), GREATEST((SELECT MAX(id) FROM products), 1));
+
+
+-- Связь заказов с аккаунтами (гостевые и старые заказы могут иметь NULL).
+ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS user_id BIGINT REFERENCES users(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_orders_user_created_at
+    ON orders(user_id, created_at DESC);
