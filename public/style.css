@@ -34,3 +34,22 @@
 .account-panel>strong{font-family:var(--display);font-size:25px;letter-spacing:-.04em}
 .account-description{margin:10px 0 22px;color:var(--muted);font-size:11px;line-height:1.7}
 @media(max-width:760px){.account-button{min-height:29px;padding:0 9px;font-size:9px}.header-actions{gap:8px}}
+
+/* История заказов в личном кабинете */
+.account-orders{margin:22px 0;border-top:1px solid var(--line);padding-top:17px}
+.account-orders-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.account-orders-heading h3{margin:0;font-family:var(--display);font-size:16px;letter-spacing:-.03em}
+.orders-refresh{border:0;background:transparent;color:var(--muted);font-size:10px;cursor:pointer}
+.orders-message{font-size:10px;line-height:1.6;color:var(--muted);margin:8px 0}
+.orders-list{display:flex;flex-direction:column;gap:10px;max-height:310px;overflow:auto}
+.order-card{background:var(--white);border:1px solid var(--line);padding:13px}
+.order-card-top,.order-card-total,.order-item{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.order-card-top>div{display:flex;flex-direction:column;gap:3px}
+.order-card-top strong{font-size:11px}
+.order-card-top small{font-size:9px;color:var(--muted)}
+.order-status{font-size:9px;background:#eef2e6;padding:5px 8px;white-space:nowrap}
+.order-items{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:10px 0;padding:8px 0;display:flex;flex-direction:column;gap:7px}
+.order-item{font-size:9px;color:var(--muted)}
+.order-item strong{color:var(--ink);white-space:nowrap}
+.order-card-total{font-size:10px}
+.order-card-total strong{font-family:var(--display);font-size:16px}
