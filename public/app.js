@@ -360,6 +360,7 @@ $('#registerForm').addEventListener('submit', async (event) => {
     state.currentUser = result.user;
     form.reset();
     renderAccount();
+    loadMyOrders();
     showToast('Аккаунт создан. Добро пожаловать!');
   } catch (error) {
     errorBox.textContent = error.message;
